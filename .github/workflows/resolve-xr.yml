@@ -52,5 +52,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: xr-symbols
-          path: work/xr_symbols.json
+          path: |
+            work/xr_symbols.json
+            work/xr_images.json
           retention-days: 7
