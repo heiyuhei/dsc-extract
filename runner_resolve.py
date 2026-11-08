@@ -6,11 +6,17 @@ Pure stdlib (mmap + struct), no numpy needed. Output is a tiny JSON.
 import os, sys, json, struct, glob
 
 def find_dsc():
-    for base in ("out", "."):
-        for p in glob.glob(os.path.join(base, "**", "dyld_shared_cache_arm64e"), recursive=True):
-            d = os.path.dirname(p)
-            if os.path.exists(os.path.join(d, "dyld_shared_cache_arm64e.symbols")):
-                return d
+    """Only the real shared cache lives under System/Library/Caches/com.apple.dyld/.
+    (DriverKit also ships a tiny dyld_shared_cache_arm64e - must be skipped.)"""
+    cands = []
+    for base in ("out", "work", "."):
+        if not os.path.isdir(base):
+            continue
+        cands += glob.glob(os.path.join(base, "**", "System", "Library", "Caches", "com.apple.dyld", "dyld_shared_cache_arm64e"), recursive=True)
+    for p in cands:
+        d = os.path.dirname(p)
+        if os.path.exists(os.path.join(d, "dyld_shared_cache_arm64e.symbols")):
+            return d
     return None
 
 D = find_dsc()
