@@ -6,18 +6,34 @@ Pure stdlib (mmap + struct), no numpy needed. Output is a tiny JSON.
 import os, sys, json, struct, glob
 
 def find_dsc():
-    """Only the real shared cache lives under System/Library/Caches/com.apple.dyld/.
-    (DriverKit also ships a tiny dyld_shared_cache_arm64e - must be skipped.)"""
+    """Find the real split dyld shared cache (skip DriverKit's tiny one)."""
+    print("cwd =", os.getcwd())
+    print("cwd contents:", sorted(os.listdir("."))[:20])
     cands = []
-    for base in ("out", "work", "."):
+    for base in ("out", "work", ".", os.getcwd()):
         if not os.path.isdir(base):
             continue
-        cands += glob.glob(os.path.join(base, "**", "System", "Library", "Caches", "com.apple.dyld", "dyld_shared_cache_arm64e"), recursive=True)
-    for p in cands:
-        d = os.path.dirname(p)
-        if os.path.exists(os.path.join(d, "dyld_shared_cache_arm64e.symbols")):
-            return d
-    return None
+        for p in glob.glob(os.path.join(base, "**", "dyld_shared_cache_arm64e"), recursive=True):
+            if "DriverKit" in p:
+                continue
+            d = os.path.dirname(p)
+            if os.path.exists(os.path.join(d, "dyld_shared_cache_arm64e.symbols")):
+                cands.append((os.path.getsize(p), d))
+    print("candidates:")
+    for sz, d in cands:
+        print(f"   {sz:>12,}  {d}")
+    if not cands:
+        # last resort: walk
+        for root, dirs, files in os.walk("."):
+            if "dyld_shared_cache_arm64e" in files and "dyld_shared_cache_arm64e.symbols" in files:
+                if "DriverKit" in root:
+                    continue
+                cands.append((os.path.getsize(os.path.join(root, "dyld_shared_cache_arm64e")), root))
+                print("   walk hit:", root)
+    if not cands:
+        return None
+    # the real one is the SMALL header file that sits with a huge .symbols
+    return cands[0][1]
 
 D = find_dsc()
 if not D:
@@ -40,13 +56,14 @@ for i in range(itc):
     end = mb.index(b"\x00", po)
     imgs.append(dict(load=lo, size=ts, path=mb[po:end].decode("utf-8", "replace")))
 print("images:", len(imgs))
+print("first images:", [im["path"] for im in imgs[:3]])
 
 with open(SYMB, "rb") as f:
     f.seek(0x4000)
     nlistOff, nlistCount, strOff, strSize, entriesOff, entriesCount = struct.unpack("<IIIIII", f.read(24))
 NBASE = 0x4000 + nlistOff
 SBASE = 0x4000 + strOff
-print("nlist:", nlistCount, "entries:", entriesCount)
+print("nlist:", nlistCount, "entries:", entriesCount, "strSize:", strSize)
 
 with open(SYMB, "rb") as f:
     f.seek(0x4000 + entriesOff)
