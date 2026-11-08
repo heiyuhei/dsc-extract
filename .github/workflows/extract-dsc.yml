@@ -1,0 +1,107 @@
+name: extract-dsc-22H31
+
+# 目标：从 iOS 18.7.1 (22H31) 全量 OTA 里取出 dyld_shared_cache_arm64e（A12 / iPhone11,x）
+# 原理：OTA 的 cryptex-system-arm64e 是 RIDIFF10，67% 必须用 AppleArchive PrivateStream（仅 macOS）
+# 来源仓库：https://github.com/Tony666-ma/_ota-dsc-extract
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_url:
+        description: 'OTA 直链'
+        required: true
+        default: 'https://updates.cdn-apple.com/2025FallFCS/patches/093-54078/93419BD6-8290-44D3-8F35-4CD16ED86AE0/com_apple_MobileAsset_SoftwareUpdate/c5223101717cea111a486f64b290b95343c42d18.zip'
+      expect_build:
+        description: '期望 BuildVersion'
+        required: true
+        default: '22H31'
+      artifact_name:
+        description: '产物名'
+        required: true
+        default: 'dsc-22H31'
+      mode:
+        description: 'ota / ipsw'
+        required: true
+        default: 'ota'
+
+permissions:
+  contents: read
+
+env:
+  IPSW_VER: '3.1.741'
+
+jobs:
+  extract:
+    runs-on: macos-15          # macOS 15 arm64，满足 AppleArchive 要求的 macOS 13+
+    timeout-minutes: 300
+
+    steps:
+      - name: 环境自检
+        run: |
+          set -eux
+          uname -a; sw_vers; uname -m; df -h /; sysctl -n hw.ncpu
+
+      - name: 安装 ipsw
+        run: |
+          set -eux
+          mkdir -p "$RUNNER_TEMP/ipswbin"
+          curl -fL --retry 3 -o "$RUNNER_TEMP/ipsw.tar.gz" \
+            "https://github.com/blacktop/ipsw/releases/download/v${IPSW_VER}/ipsw_${IPSW_VER}_macOS_arm64.tar.gz"
+          tar xzf "$RUNNER_TEMP/ipsw.tar.gz" -C "$RUNNER_TEMP/ipswbin"
+          chmod +x "$RUNNER_TEMP/ipswbin/ipsw"
+          sudo install -m 0755 "$RUNNER_TEMP/ipswbin/ipsw" /usr/local/bin/ipsw
+          ipsw version
+
+      - name: 下载 OTA（断点续传，Apple CDN 会中途 RST）
+        run: |
+          set -eux
+          OUT="$RUNNER_TEMP/image.zip"
+          for i in $(seq 1 40); do
+            echo "=== attempt $i ==="
+            if curl -fL --retry 0 --connect-timeout 30 --max-time 2400 \
+                 -C - -o "$OUT" "${{ inputs.source_url }}"; then
+              echo "download OK"; break
+            fi
+            RC=$?
+            echo "curl rc=$RC size=$(stat -f %z "$OUT" 2>/dev/null || echo 0)"
+            [ "$RC" = "33" ] && { echo "::error::不支持 Range 续传"; exit 1; }
+            sleep 10
+            [ "$i" = "40" ] && { echo "::error::40 次重试仍失败"; exit 1; }
+          done
+          ls -lh "$OUT"; df -h /
+
+      - name: 确认 build
+        run: ipsw ota info "$RUNNER_TEMP/image.zip" || true
+
+      - name: 提取 dyld_shared_cache
+        run: |
+          set -eux
+          mkdir -p "$RUNNER_TEMP/out"
+          ipsw ota extract "$RUNNER_TEMP/image.zip" --dyld --output "$RUNNER_TEMP/out" 2>&1 | tee /tmp/extract.log
+          find "$RUNNER_TEMP/out" -name 'dyld_shared_cache_arm64e*' | head -50
+
+      - name: 校验 build
+        run: |
+          set -eux
+          SV=$(find "$RUNNER_TEMP/out" -name 'SystemVersion.plist' | head -1 || true)
+          [ -n "$SV" ] && /usr/libexec/PlistBuddy -c 'Print :ProductBuildVersion' "$SV" || true
+          grep -rho '22[A-Z][0-9]\{2,3\}' /tmp/extract.log | sort -u | head -20 || true
+
+      - name: 校验 dsc 头
+        run: |
+          set -eux
+          cd "$RUNNER_TEMP/out" || exit 0
+          for f in $(find . -name 'dyld_shared_cache_arm64e*'); do
+            echo "$f size=$(stat -f %z "$f") magic=$(head -c 7 "$f")"
+          done
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: |
+            ${{ runner.temp }}/out
+            /tmp/extract.log
+          compression-level: 0
+          if-no-files-found: warn
+          retention-days: 30
