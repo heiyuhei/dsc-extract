@@ -46,7 +46,7 @@ jobs:
           cp ../runner_resolve.py .
           cp ../targets.json .
           python3 -V
-          python3 runner_resolve.py 2>&1 | tail -40
+          python3 runner_resolve.py 2>&1
 
       - name: 上传结果
         uses: actions/upload-artifact@v4
