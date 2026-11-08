@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Run on the GitHub runner: resolve the 53 target symbols inside the XR dyld cache.
-Pure stdlib (mmap + struct), no numpy needed. Output is a tiny JSON.
-"""
-import os, sys, json, struct, glob
+"""Runner-side: locate the XR shared cache, dump image bases, and try to resolve target symbols."""
+import os, sys, json, struct, glob, mmap
 
 def find_dsc():
-    """Find the real split dyld shared cache (skip DriverKit's tiny one)."""
     print("cwd =", os.getcwd())
-    print("cwd contents:", sorted(os.listdir("."))[:20])
-    cands = []
+    best = None
     for base in ("out", "work", ".", os.getcwd()):
         if not os.path.isdir(base):
             continue
@@ -18,31 +14,20 @@ def find_dsc():
                 continue
             d = os.path.dirname(p)
             if os.path.exists(os.path.join(d, "dyld_shared_cache_arm64e.symbols")):
-                cands.append((os.path.getsize(p), d))
-    print("candidates:")
-    for sz, d in cands:
-        print(f"   {sz:>12,}  {d}")
-    if not cands:
-        # last resort: walk
-        for root, dirs, files in os.walk("."):
-            if "dyld_shared_cache_arm64e" in files and "dyld_shared_cache_arm64e.symbols" in files:
-                if "DriverKit" in root:
-                    continue
-                cands.append((os.path.getsize(os.path.join(root, "dyld_shared_cache_arm64e")), root))
-                print("   walk hit:", root)
-    if not cands:
-        return None
-    # the real one is the SMALL header file that sits with a huge .symbols
-    return cands[0][1]
+                sz = os.path.getsize(p)
+                if best is None or sz < best[0]:
+                    best = (sz, d)
+    return best[1] if best else None
 
 D = find_dsc()
 if not D:
-    print("DSC NOT FOUND", file=sys.stderr); sys.exit(1)
+    print("DSC NOT FOUND"); sys.exit(1)
 MAIN = os.path.join(D, "dyld_shared_cache_arm64e")
 SYMB = os.path.join(D, "dyld_shared_cache_arm64e.symbols")
-print("dsc dir:", D, "main size:", os.path.getsize(MAIN))
+print("dsc dir:", D)
+print("main:", os.path.getsize(MAIN), "symbols:", os.path.getsize(SYMB))
 
-TARGETS = json.load(open("targets.json"))   # {key: {"module":..., "name":...}}
+TARGETS = json.load(open("targets.json"))
 
 # ---------- images ----------
 with open(MAIN, "rb") as f:
@@ -54,16 +39,17 @@ for i in range(itc):
     o = ito + i*32
     lo, ts, po = struct.unpack_from("<QII", mb, o+16)
     end = mb.index(b"\x00", po)
-    imgs.append(dict(load=lo, size=ts, path=mb[po:end].decode("utf-8", "replace")))
+    imgs.append({"load": lo, "size": ts, "path": mb[po:end].decode("utf-8", "replace")})
 print("images:", len(imgs))
-print("first images:", [im["path"] for im in imgs[:3]])
+json.dump(imgs, open("xr_images.json", "w"))
 
+# ---------- local symbols ----------
 with open(SYMB, "rb") as f:
     f.seek(0x4000)
     nlistOff, nlistCount, strOff, strSize, entriesOff, entriesCount = struct.unpack("<IIIIII", f.read(24))
 NBASE = 0x4000 + nlistOff
 SBASE = 0x4000 + strOff
-print("nlist:", nlistCount, "entries:", entriesCount, "strSize:", strSize)
+print("nlist:", nlistCount, "entries:", entriesCount, "strOff:", hex(strOff), "strSize:", strSize)
 
 with open(SYMB, "rb") as f:
     f.seek(0x4000 + entriesOff)
@@ -71,60 +57,63 @@ with open(SYMB, "rb") as f:
 entries = []
 for i in range(entriesCount):
     dy, st, cn = struct.unpack_from("<QII", eb, i*16)
-    entries.append((st, cn))
+    entries.append((dy, st, cn))
 
-# module basename -> image index
-def img_index_for(modname):
-    hits = [i for i, im in enumerate(imgs) if os.path.basename(im["path"]).replace(".dylib","") == modname
-            or modname in im["path"]]
-    return hits
-
-want = {}   # (imgsym name) -> key
-by_module = {}
-for key, t in TARGETS.items():
-    if not t.get("name"):
-        continue
-    by_module.setdefault(t["module"], []).append((key, t["name"]))
-
-res = {}
-mm = open(SYMB, "rb")
-try:
-    import mmap
-    m = mmap.mmap(mm.fileno(), 0, access=mmap.ACCESS_READ)
-except Exception:
-    m = None
+fm = open(SYMB, "rb")
+m = mmap.mmap(fm.fileno(), 0, access=mmap.ACCESS_READ)
 
 def cstr(off):
     e = m.find(b"\x00", SBASE + off)
+    if e < 0: return ""
     return m[SBASE+off:e].decode("latin1")
 
-for mod, items in by_module.items():
-    idxs = img_index_for(mod)
-    if not idxs:
-        print(f"  [{mod}] image not found"); continue
-    names = dict(items)     # symbol name -> key
+# sanity: dump the first symbols of the whole table
+print("first 5 symbol names in table:")
+for k in range(5):
+    o = NBASE + k*16
+    strx = struct.unpack_from("<I", m, o)[0]
+    val = struct.unpack_from("<Q", m, o+8)[0]
+    print("    ", repr(cstr(strx)[:50]), hex(val))
+
+# map module name -> image indices
+def imgs_for(mod):
+    out = []
+    for i, im in enumerate(imgs):
+        b = os.path.basename(im["path"])
+        if b == mod or b.replace(".dylib", "") == mod or mod in im["path"]:
+            out.append(i)
+    return out
+
+by_module = {}
+for key, t in TARGETS.items():
+    if t.get("name"):
+        by_module.setdefault(t["module"], []).append((key, t["name"]))
+
+res = {}
+for mod, items in sorted(by_module.items()):
+    idxs = imgs_for(mod)
+    names = dict((nm, key) for key, nm in items)
     found = {}
+    dbg = []
     for ii in idxs:
-        st, cn = entries[ii]
+        dy, st, cn = entries[ii]
         base = NBASE + st*16
         for k in range(cn):
             o = base + k*16
             strx = struct.unpack_from("<I", m, o)[0]
-            val  = struct.unpack_from("<Q", m, o+8)[0]
+            val = struct.unpack_from("<Q", m, o+8)[0]
             if strx >= strSize: continue
             s = cstr(strx)
+            if mod == sorted(by_module.keys())[0] and k < 8:
+                dbg.append((s[:45], hex(val)))
             if s in names:
                 found.setdefault(names[s], val)
-    for nm, key in names.items():
-        if key in found:
-            res[key] = dict(value=found[key], how="local", module=mod, name=nm)
-    print(f"  [{mod}] wanted={len(names)} found={len([k for k in found])}")
+    print(f"[{mod}] imgs={len(idxs)} wanted={len(names)} found={len(found)}")
+    if dbg:
+        print("    sample syms:", dbg[:6])
+    for key, val in found.items():
+        res[key] = {"value": val, "how": "local", "module": mod}
 
-if m: m.close()
-
+m.close(); fm.close()
 json.dump(res, open("xr_symbols.json", "w"), indent=1)
-print("\nresolved:", len(res), "/", len(TARGETS))
-missing = [k for k in TARGETS if k not in res and TARGETS[k].get("name")]
-print("missing:", len(missing))
-for k in missing[:20]:
-    print("   ", k, TARGETS[k]["name"])
+print("RESOLVED", len(res), "of", len([k for k in TARGETS if TARGETS[k].get("name")]))
