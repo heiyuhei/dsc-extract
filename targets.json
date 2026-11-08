@@ -1,0 +1,267 @@
+{
+ "AVFAudio__AVLoadSpeechSynthesisImplementation_onceToken": {
+  "module": "AVFAudio",
+  "name": "__ZZ36_AVLoadSpeechSynthesisImplementationvE9onceToken",
+  "xs_value": 8280628776
+ },
+ "AVFAudio__OBJC_CLASS__AVSpeechSynthesisMarker": {
+  "module": "AVFAudio",
+  "name": "_OBJC_CLASS_$_AVSpeechSynthesisMarker",
+  "xs_value": 8280627472
+ },
+ "AVFAudio__OBJC_CLASS__AVSpeechSynthesisProviderRequest": {
+  "module": "AVFAudio",
+  "name": "_OBJC_CLASS_$_AVSpeechSynthesisProviderRequest",
+  "xs_value": 8280627312
+ },
+ "AVFAudio__OBJC_CLASS__AVSpeechSynthesisVoice": {
+  "module": "AVFAudio",
+  "name": "_OBJC_CLASS_$_AVSpeechSynthesisVoice",
+  "xs_value": 8280627392
+ },
+ "AVFAudio__OBJC_CLASS__AVSpeechUtterance": {
+  "module": "AVFAudio",
+  "name": "_OBJC_CLASS_$_AVSpeechUtterance",
+  "xs_value": 8280624312
+ },
+ "AXCoreUtilities__DefaultLoader": {
+  "module": "AXCoreUtilities",
+  "name": "_defaultLoader._DefaultLoader",
+  "xs_value": 8244004528
+ },
+ "CFNetwork__gConstantCFStringValueTable": {
+  "module": "CFNetwork",
+  "name": "_gConstantCFStringValueTable",
+  "xs_value": 8295674880
+ },
+ "CMPhoto__CMPhotoCompressionCreateContainerFromImageExt": {
+  "module": "CMPhoto",
+  "name": "_CMPhotoCompressionCreateContainerFromImageExt",
+  "xs_value": 7180338288
+ },
+ "CMPhoto__CMPhotoCompressionCreateDataContainerFromImage": {
+  "module": "CMPhoto",
+  "name": "_CMPhotoCompressionCreateDataContainerFromImage",
+  "xs_value": 7180338632
+ },
+ "CMPhoto__CMPhotoCompressionSessionAddAuxiliaryImage": {
+  "module": "CMPhoto",
+  "name": "_CMPhotoCompressionSessionAddAuxiliaryImage",
+  "xs_value": 7180139776
+ },
+ "CMPhoto__CMPhotoCompressionSessionAddAuxiliaryImageFromDictionaryRepresentation": {
+  "module": "CMPhoto",
+  "name": "_CMPhotoCompressionSessionAddAuxiliaryImageFromDictionaryRepresentation",
+  "xs_value": 7180141100
+ },
+ "CMPhoto__CMPhotoCompressionSessionAddCustomMetadata": {
+  "module": "CMPhoto",
+  "name": "_CMPhotoCompressionSessionAddCustomMetadata",
+  "xs_value": 7180142480
+ },
+ "CMPhoto__CMPhotoCompressionSessionAddExif": {
+  "module": "CMPhoto",
+  "name": "_CMPhotoCompressionSessionAddExif",
+  "xs_value": 7180141388
+ },
+ "CMPhoto__kCMPhotoTranscodeOption_Strips": {
+  "module": "CMPhoto",
+  "name": "_kCMPhotoTranscodeOption_Strips",
+  "xs_value": 8185847136
+ },
+ "GPUProcess_singleton": {
+  "module": "WebKit",
+  "name": "__ZZN6WebKit10GPUProcess9singletonEvE10gpuProcess",
+  "xs_value": 8245473952
+ },
+ "ImageIO__IIOLoadCMPhotoSymbols": {
+  "module": "ImageIO",
+  "name": "__ZL21IIOLoadCMPhotoSymbolsv",
+  "xs_value": 6583363992
+ },
+ "ImageIO__gFunc_CMPhotoCompressionCreateContainerFromImageExt": {
+  "module": "ImageIO",
+  "name": "_gFunc_CMPhotoCompressionCreateContainerFromImageExt",
+  "xs_value": 8279450864
+ },
+ "ImageIO__gFunc_CMPhotoCompressionCreateDataContainerFromImage": {
+  "module": "ImageIO",
+  "name": "_gFunc_CMPhotoCompressionCreateDataContainerFromImage",
+  "xs_value": 8279450016
+ },
+ "ImageIO__gFunc_CMPhotoCompressionSessionAddAuxiliaryImage": {
+  "module": "ImageIO",
+  "name": "_gFunc_CMPhotoCompressionSessionAddAuxiliaryImage",
+  "xs_value": 8279450024
+ },
+ "ImageIO__gFunc_CMPhotoCompressionSessionAddAuxiliaryImageFromDictionaryRepresentation": {
+  "module": "ImageIO",
+  "name": "_gFunc_CMPhotoCompressionSessionAddAuxiliaryImageFromDictionaryRepresentation",
+  "xs_value": 8279450032
+ },
+ "ImageIO__gFunc_CMPhotoCompressionSessionAddCustomMetadata": {
+  "module": "ImageIO",
+  "name": "_gFunc_CMPhotoCompressionSessionAddCustomMetadata",
+  "xs_value": 8279449840
+ },
+ "ImageIO__gFunc_CMPhotoCompressionSessionAddExif": {
+  "module": "ImageIO",
+  "name": "_gFunc_CMPhotoCompressionSessionAddExif",
+  "xs_value": 8279450040
+ },
+ "ImageIO__gImageIOLogProc": {
+  "module": "ImageIO",
+  "name": "__ZL15gImageIOLogProc",
+  "xs_value": 8296240752
+ },
+ "JavaScriptCore__globalFuncParseFloat": {
+  "module": "JavaScriptCore",
+  "name": "__ZN3JSC20globalFuncParseFloatEPNS_14JSGlobalObjectEPNS_9CallFrameE",
+  "xs_value": 6883845612
+ },
+ "MediaAccessibility__MACaptionAppearanceGetDisplayType": {
+  "module": "MediaAccessibility",
+  "name": "_MACaptionAppearanceGetDisplayType",
+  "xs_value": 7424120644
+ },
+ "Security__SecKeychainBackupSyncable_block_invoke": {
+  "module": "Security",
+  "name": "____SecKeychainBackupSyncable_block_invoke",
+  "xs_value": 6633208112
+ },
+ "Security__SecOTRSessionProcessPacketRemote_block_invoke": {
+  "module": "Security",
+  "name": "___SecOTRSessionProcessPacketRemote_block_invoke",
+  "xs_value": 6633290752
+ },
+ "Security__gSecurityd": {
+  "module": "Security",
+  "name": "_gSecurityd",
+  "xs_value": 8242716848
+ },
+ "TextToSpeech__OBJC_CLASS__TtC12TextToSpeech27TTSMagicFirstPartyAudioUnit": {
+  "module": "TextToSpeech",
+  "name": "_OBJC_CLASS_$__TtC12TextToSpeech27TTSMagicFirstPartyAudioUnit",
+  "xs_value": 8283444776
+ },
+ "WebCore__DedicatedWorkerGlobalScope_vtable": {
+  "module": "WebCore",
+  "name": "__ZTVN7WebCore26DedicatedWorkerGlobalScopeE",
+  "xs_value": 8340004288
+ },
+ "WebCore__PAL_getPKContactClass": {
+  "module": "WebCore",
+  "name": "__ZN3PAL17getPKContactClassE",
+  "xs_value": 8280123896
+ },
+ "WebCore__ZZN7WebCoreL29allScriptExecutionContextsMapEvE8contexts": {
+  "module": "WebCore",
+  "name": "__ZZN7WebCoreL29allScriptExecutionContextsMapEvE8contexts",
+  "xs_value": 8245166848
+ },
+ "WebCore__softLinkDDDFAScannerFirstResultInUnicharArray": {
+  "module": "WebCore",
+  "name": "__ZL45softLinkDDDFAScannerFirstResultInUnicharArray",
+  "xs_value": 8280153352
+ },
+ "WebCore__softLinkMediaAccessibilityMACaptionAppearanceGetDisplayType": {
+  "module": "WebCore",
+  "name": "__ZN7WebCore59softLinkMediaAccessibilityMACaptionAppearanceGetDisplayTypeE",
+  "xs_value": 8280153328
+ },
+ "WebCore__softLinkOTSVGOTSVGTableRelease": {
+  "module": "WebCore",
+  "name": "__ZN3PAL30softLinkOTSVGOTSVGTableReleaseE",
+  "xs_value": 8297858376
+ },
+ "WebProcess_ensureGPUProcessConnection": {
+  "module": "WebKit",
+  "name": "__ZN6WebKit10WebProcess26ensureGPUProcessConnectionEv",
+  "xs_value": 6859435572
+ },
+ "WebProcess_gpuProcessConnectionClosed": {
+  "module": "WebKit",
+  "name": "__ZN6WebKit10WebProcess26gpuProcessConnectionClosedEv",
+  "xs_value": 6869707788
+ },
+ "WebProcess_singleton": {
+  "module": "WebKit",
+  "name": "__ZZN6WebKit10WebProcess9singletonEvE7process",
+  "xs_value": 8280111424
+ },
+ "__pthread_head": {
+  "module": "libsystem_pthread",
+  "name": "___pthread_head",
+  "xs_value": 10344972320
+ },
+ "dyld__RuntimeState_emptySlot": {
+  "module": "dyld",
+  "name": "__ZN5dyld412RuntimeState9emptySlotEv",
+  "xs_value": 7136852844
+ },
+ "dyld__RuntimeState_vtable": {
+  "module": "dyld",
+  "name": "__ZTVN5dyld412RuntimeStateE",
+  "xs_value": 8361986552
+ },
+ "dyld__signPointer": {
+  "module": "dyld",
+  "name": "__Z11signPointeryPvbt11ptrauth_key",
+  "xs_value": 7136824876
+ },
+ "free_slabs": {
+  "module": "QuartzCore",
+  "name": "__ZN2CA2CG5Queue11_free_slabsE",
+  "xs_value": 8279347920
+ },
+ "libdyld__dlopen": {
+  "module": "libdyld",
+  "name": "_dlopen",
+  "xs_value": 7201843128
+ },
+ "libdyld__dlsym": {
+  "module": "libdyld",
+  "name": "_dlsym",
+  "xs_value": 7201847860
+ },
+ "libdyld__gAPIs": {
+  "module": "libdyld",
+  "name": "__ZN5dyld45gAPIsE",
+  "xs_value": 8275230720
+ },
+ "libsystem_c__atexit_mutex": {
+  "module": "libsystem_c",
+  "name": "_atexit_mutex",
+  "xs_value": 8278452056
+ },
+ "libsystem_kernel__thread_suspend": {
+  "module": "libsystem_kernel",
+  "name": "_thread_suspend",
+  "xs_value": 7845441984
+ },
+ "mach_task_self_ptr": {
+  "module": "dyld",
+  "name": "_mach_task_self_",
+  "xs_value": 8278473664
+ },
+ "mainRunLoop": {
+  "module": "JavaScriptCore",
+  "name": "__ZN3WTFL13s_mainRunLoopE",
+  "xs_value": 8280948768
+ },
+ "Foundation__NSBundleTables_bundleTables_value": {
+  "module": "Foundation",
+  "name": "__MergedGlobals",
+  "xs_value": 8278588232
+ },
+ "WebCore__softLinkDDDFACacheCreateFromFramework": {
+  "module": "WebCore",
+  "name": "__MergedGlobals",
+  "xs_value": 8280153360
+ },
+ "emptyString": {
+  "module": "JavaScriptCore",
+  "name": "__ZN3WTF10StringImpl17s_emptyAtomStringE",
+  "xs_value": 8280851488
+ }
+}
